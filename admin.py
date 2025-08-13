@@ -56,51 +56,22 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Configuration Section
-st.header("⚙️ Configuration")
+# Backend Configuration (Hidden from users)
+# TODO: Set these values according to your repository
+GITHUB_TOKEN = "your_github_token_here"  # Replace with your actual token
+REPO_OWNER = "your_github_username"      # Replace with your GitHub username
+REPO_NAME = "your_repo_name"             # Replace with your repository name
+BRANCH_NAME = "main"                     # Your target branch
+UPLOAD_PATH = "data/"                    # Path where files will be uploaded
+COMMIT_MESSAGE_TEMPLATE = "Add dataset: {filename} - {timestamp}"
 
-# Create columns for configuration
-col1, col2 = st.columns(2)
-
-with col1:
-    github_token = st.text_input(
-        "GitHub Personal Access Token", 
-        type="password", 
-        help="Generate a token with 'repo' permissions from GitHub Settings > Developer settings > Personal access tokens"
-    )
-    
-    repo_owner = st.text_input(
-        "Repository Owner", 
-        placeholder="your-username",
-        help="GitHub username or organization name"
-    )
-
-with col2:
-    repo_name = st.text_input(
-        "Repository Name", 
-        placeholder="your-repo-name",
-        help="Name of your repository"
-    )
-    
-    branch_name = st.text_input(
-        "Branch Name", 
-        value="main",
-        help="Target branch for uploads"
-    )
-
-# Advanced settings in expander
-with st.expander("🔧 Advanced Settings"):
-    upload_path = st.text_input(
-        "Upload Path in Repository", 
-        value="data/",
-        help="Path where files will be uploaded (e.g., 'data/' or 'datasets/raw/')"
-    )
-    
-    commit_message_template = st.text_input(
-        "Commit Message Template",
-        value="Add dataset: {filename} - {timestamp}",
-        help="Use {filename} and {timestamp} placeholders"
-    )
+# Assign backend config to variables
+github_token = GITHUB_TOKEN
+repo_owner = REPO_OWNER
+repo_name = REPO_NAME
+branch_name = BRANCH_NAME
+upload_path = UPLOAD_PATH
+commit_message_template = COMMIT_MESSAGE_TEMPLATE
 
 # File Upload Section
 st.header("📁 File Upload")
@@ -144,9 +115,11 @@ if uploaded_files:
 
 # Helper Functions
 def validate_config():
-    """Validate the configuration"""
-    if not all([github_token, repo_owner, repo_name, branch_name]):
-        st.error("❌ Please fill in all required configuration fields")
+    """Validate the backend configuration"""
+    if not all([GITHUB_TOKEN != "your_github_token_here", 
+                REPO_OWNER != "your_github_username", 
+                REPO_NAME != "your_repo_name"]):
+        st.error("❌ Backend configuration incomplete. Please contact admin.")
         return False
     return True
 
@@ -322,16 +295,14 @@ st.header("ℹ️ Information")
 
 with st.expander("📖 How to use this admin panel"):
     st.markdown("""
-    ### Setup Instructions:
-    1. **GitHub Token**: Generate a Personal Access Token with 'repo' permissions
-        - Go to GitHub Settings → Developer settings → Personal access tokens
-        - Generate new token with full 'repo' access
+    ### Simple Upload Process:
+    1. **Select Files**: Choose one or multiple files to upload
+    2. **Preview**: Review file sizes and upload methods
+    3. **Upload**: Click the upload button to add files to the repository
     
-    2. **Repository Details**: Enter your repository owner and name
-    
-    3. **File Upload**: 
-        - Files < 25MB: Direct upload via GitHub API
-        - Files ≥ 25MB: Automatic Git LFS handling
+    ### File Handling:
+    - Files < 25MB: Direct upload (fast)
+    - Files ≥ 25MB: Git LFS handling (automatic)
     
     ### Supported File Types:
     - Excel files (.xlsx)
@@ -341,19 +312,27 @@ with st.expander("📖 How to use this admin panel"):
     - PDF files (.pdf)
     - Word documents (.docx)
     
-    ### Git LFS Requirements:
-    For files larger than 25MB, Git LFS must be installed on the server running this application.
-    """)
+    ### Repository Information:
+    - Target Repository: `{repo_owner}/{repo_name}`
+    - Upload Path: `{upload_path}`
+    - Branch: `{branch_name}`
+    """.format(repo_owner=REPO_OWNER, repo_name=REPO_NAME, upload_path=UPLOAD_PATH, branch_name=BRANCH_NAME))
 
-with st.expander("🔒 Security Notes"):
+with st.expander("🔒 Admin Information"):
     st.markdown("""
-    ### Important Security Considerations:
-    - Never share your GitHub token with others
-    - Use tokens with minimal required permissions
-    - Consider using environment variables for sensitive data in production
-    - Regularly rotate your access tokens
-    - Monitor repository access and commits
-    """)
+    ### Backend Configuration:
+    This application is pre-configured to upload files to your repository.
+    
+    ### Security Features:
+    - GitHub credentials are stored securely in backend
+    - Users cannot access or modify repository settings
+    - All uploads are logged with timestamps
+    
+    ### File Storage:
+    - Repository: `{repo_owner}/{repo_name}`
+    - Upload directory: `{upload_path}`
+    - Branch: `{branch_name}`
+    """.format(repo_owner=REPO_OWNER, repo_name=REPO_NAME, upload_path=UPLOAD_PATH, branch_name=BRANCH_NAME))
 
 # Footer
 st.markdown("---")
