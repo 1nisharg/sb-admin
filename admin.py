@@ -56,14 +56,23 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# Backend Configuration (Hidden from users)
-# TODO: Set these values according to your repository
-GITHUB_TOKEN = "your_github_token_here"  # Replace with your actual token
-REPO_OWNER = "your_github_username"      # Replace with your GitHub username
-REPO_NAME = "your_repo_name"             # Replace with your repository name
-BRANCH_NAME = "main"                     # Your target branch
-UPLOAD_PATH = "data/"                    # Path where files will be uploaded
-COMMIT_MESSAGE_TEMPLATE = "Add dataset: {filename} - {timestamp}"
+# Backend Configuration (Using Environment Variables)
+# Set these in Streamlit Cloud secrets or environment variables
+try:
+    GITHUB_TOKEN = st.secrets["GITHUB_TOKEN"] if "GITHUB_TOKEN" in st.secrets else os.getenv("GITHUB_TOKEN", "")
+    REPO_OWNER = st.secrets.get("REPO_OWNER", os.getenv("REPO_OWNER", ""))
+    REPO_NAME = st.secrets.get("REPO_NAME", os.getenv("REPO_NAME", ""))
+    BRANCH_NAME = st.secrets.get("BRANCH_NAME", os.getenv("BRANCH_NAME", "main"))
+    UPLOAD_PATH = st.secrets.get("UPLOAD_PATH", os.getenv("UPLOAD_PATH", "data/"))
+    COMMIT_MESSAGE_TEMPLATE = st.secrets.get("COMMIT_MESSAGE_TEMPLATE", os.getenv("COMMIT_MESSAGE_TEMPLATE", "Add dataset: {filename} - {timestamp}"))
+except:
+    # Fallback to environment variables only
+    GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
+    REPO_OWNER = os.getenv("REPO_OWNER", "")
+    REPO_NAME = os.getenv("REPO_NAME", "")
+    BRANCH_NAME = os.getenv("BRANCH_NAME", "main")
+    UPLOAD_PATH = os.getenv("UPLOAD_PATH", "data/")
+    COMMIT_MESSAGE_TEMPLATE = os.getenv("COMMIT_MESSAGE_TEMPLATE", "Add dataset: {filename} - {timestamp}")
 
 # Assign backend config to variables
 github_token = GITHUB_TOKEN
@@ -116,10 +125,15 @@ if uploaded_files:
 # Helper Functions
 def validate_config():
     """Validate the backend configuration"""
-    if not all([GITHUB_TOKEN != "your_github_token_here", 
-                REPO_OWNER != "your_github_username", 
-                REPO_NAME != "your_repo_name"]):
-        st.error("❌ Backend configuration incomplete. Please contact admin.")
+    if not GITHUB_TOKEN:
+        st.error("❌ GitHub token not found. Please configure GITHUB_TOKEN in Streamlit secrets.")
+        st.info("💡 Go to Streamlit Cloud → Settings → Secrets and add: GITHUB_TOKEN = 'your_token_here'")
+        return False
+    if not REPO_OWNER:
+        st.error("❌ Repository owner not configured. Please set REPO_OWNER in Streamlit secrets.")
+        return False
+    if not REPO_NAME:
+        st.error("❌ Repository name not configured. Please set REPO_NAME in Streamlit secrets.")
         return False
     return True
 
